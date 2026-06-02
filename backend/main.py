@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from routes.expenses import router as expenses_router
+from routes.transactions import router as transactions_router
 from schemas import TransactionParseRequest, TransactionParseResponse
 from parser import parse_message
 
@@ -32,6 +33,7 @@ app.add_middleware(
 )
 
 app.include_router(expenses_router)
+app.include_router(transactions_router)
 
 
 @app.post("/parse-transaction", response_model=TransactionParseResponse, tags=["AI Parser"])

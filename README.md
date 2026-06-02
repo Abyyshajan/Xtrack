@@ -23,6 +23,8 @@ For evaluators and managers, **XTrack** stands as a robust software engineering 
 | Feature | Description | Business & User Benefit |
 | :--- | :--- | :--- |
 | **Smart Expense Detection** | Paste text alerts (UPI, bank SMS, notifications) to automatically extract Merchant, Amount, Inferred Category, and Date. | **Major Product Differentiator**: Reduces manual transaction log entry time by up to 90%; eliminates tedious form typing. |
+| **Smart Transaction Inbox** | A staging area where parsed suggestions are queued for review. Users selectively **Accept** or **Ignore** suggestions. | **Data Integrity Guard**: Human-in-the-loop workflow that ensures absolute accuracy in financial logs and blocks false alert pollution. |
+| **Demo Transaction Generator** | One-click transaction simulation tool generating realistic notifications for Swiggy, Uber, Amazon, Netflix, etc. | **Frictionless Evaluation**: Allows immediate, end-to-end testing of the parser and review queue without live bank integrations. |
 | **Transaction Ledger (CRUD)** | Effortlessly create, read, update, and delete expenses with standard fields: title, amount, category, date, and optional text notes. | Full control over financial history; immediate synchronization keeps data accurate. |
 | **Dynamic Month Selector** | Select and view summaries for any month/year using a clean input picker or Previous/Next increment buttons. | Allows comparative review of spending across past, present, and future billing cycles. |
 | **Visual Analytics Dashboard** | Real-time interactive doughnut chart (using Chart.js) and list-based percentage breakdown based on categorized spending. | Immediate cognitive processing of primary expense categories; saves time in reading long tables. |
@@ -96,6 +98,61 @@ The category is inferred using keyword matching:
 - **SMS Auto-Detection**: A mobile app companion to automatically read transaction SMS.
 - **Email Scraping**: A browser extension to automatically parse digital receipts from inbox subscriptions.
 - **ML Refinement**: Integrating a lightweight, offline-optimized classifier to categorize transactions with higher accuracy over time.
+
+---
+
+## 📥 Smart Transaction Inbox
+
+While the transaction parser allows rapid auto-filling of transaction entries, manual copy-pasting still relies on active user initiative. To further elevate the user experience, XTrack implements a robust **Smart Transaction Inbox** review-based workflow.
+
+### 1. The Problem
+Users often forget to manually record expenses in the moment. By the time they open a finance tracker days or weeks later, the exact dates, merchant names, or spending amounts are forgotten or lost in their messaging streams. This delayed friction is the number one cause of personal budget tracking abandonment.
+
+### 2. The Solution
+XTrack solves this by introducing an intelligent SMS-reception queue simulation. When transaction notifications are simulated or detected, they are processed through the parsing engine and registered in the database as pending **Transaction Suggestions** within the **Smart Transaction Inbox**. This ensures that transactional events are captured instantly and held securely for review.
+
+### 3. Review-Based Workflow
+Unlike standard tracking tools that auto-generate logs, XTrack employs a highly deliberate **Review-Based Workflow** that prioritizes data hygiene and user control.
+
+```mermaid
+graph TD
+    A["Raw Transaction Message"] -->|POST /transactions/detect| B["Parser Engine"]
+    B -->|Offline Regex Parse| C["Pending Transaction (Inbox)"]
+    C -->|Rendered in UI| D["User Review"]
+    D -->|Click Accept| E["Real Expense Record Created"]
+    D -->|Click Ignore| F["Suggestion Dismissed"]
+```
+
+### 4. The Engineering Rationale: Why Automatic Expense Creation is Intentionally Avoided
+
+During the design phase, the engineering and product team made a conscious, deliberate choice **not to automatically create actual database expenses** from incoming transaction alerts. While auto-creation might seem like a convenience on paper, in practice, it introduces significant operational liabilities:
+
+* **Preventing False Positives**: Financial SMS streams are highly noisy. Alerts contain balance updates, credit card limit updates, cashbacks, peer-to-peer transfers, and rejected transaction notices. Auto-logging these would pollute the database with duplicate or invalid logs.
+* **Preventing Incorrect Categorization**: Transaction categories are inferred using keyword rule lists. Although highly accurate, edge cases exist (e.g., purchasing a gift at "Amazon" might be a `Bills` expense rather than `Shopping`). A review stage gives the user a zero-effort opportunity to redirect or edit details before final submission.
+* **Maintaining User Trust**: A financial ledger is a source of truth. If a user sees unexplained logs in their dashboard, it erodes trust in the platform's reliability. Requiring an explicit action guarantees that the database reflects only the user's verified reality.
+* **Giving Users Ultimate Control**: Placing a human-in-the-loop review step ensures the user maintains complete stewardship of their financial records, selecting only the real expenses that belong in their personal balance sheets.
+
+By presenting transactions as **suggestions** rather than automated entries, the system bridges the gap between effortless automation and reliable, high-integrity accounting.
+
+---
+
+## 🧪 Demo Transaction Generator
+
+To allow evaluators and testers to experience the complete **Smart Transaction Inbox** review and approval workflow without requiring access to real SMS notifications, physical banking alerts, or live SMS gateways, XTrack integrates an elegant **Demo Transaction Generator** utility.
+
+### 1. Purpose & Frictionless Testing
+In real-world usage, the system receives transaction notifications asynchronously via device-level background interceptors or messaging webhooks. For testing purposes, this simulator exposes a direct, one-click interface to generate realistic notifications instantly.
+
+By bypassing physical hardware dependencies, the evaluator can verify the end-to-end flow:
+$$\text{Simulated Alert} \rightarrow \text{NLP Regex Parser} \rightarrow \text{Staging Suggestions Queue} \rightarrow \text{User Review Action}$$
+
+### 2. User & Evaluator Journey
+1. **Trigger simulation**: Click on any of the pre-configured merchant buttons (e.g., **Swiggy**, **Uber**, **Netflix**, **Electricity Bill**) or click **Random Transaction**.
+2. **Review incoming card**: A status alert `"Simulating Transaction Detection..."` pops up, and a new suggestion card appears in the **Smart Transaction Inbox** with its badge count incremented.
+3. **Decide action**:
+   * Click **Accept**: The suggestion disappears, is immediately committed as a real expense, and updates the **Monthly Summary** aggregates and doughnut chart.
+   * Click **Ignore**: The suggestion is dismissed from the database and vanishes from the inbox view.
+4. **Simulate a Full Day**: Click **Simulate One Day of Spending** to generate a sequence of 5 distinct spending events (Starbucks, Swiggy, Uber, Netflix, Amazon) sequentially, demonstrating the system's capacity to handle multiple incoming transactions.
 
 ---
 
@@ -200,6 +257,10 @@ All routes reside under the `/expenses` router. Interactive Swagger docs are gen
 | **`PUT`** | `/expenses/{id}` | Update partial fields | Database key `id`, `ExpenseUpdate` JSON | `ExpenseResponse` (200 OK) |
 | **`DELETE`**| `/expenses/{id}` | Delete a transaction | Database primary key `id` | JSON Confirmation (200 OK) |
 | **`POST`** | `/parse-transaction` | Auto-extract SMS alerts | `TransactionParseRequest` JSON | `TransactionParseResponse` (200 OK) |
+| **`POST`** | `/transactions/detect` | Queue a transaction alert | `TransactionDetectRequest` JSON | `PendingTransactionResponse` (201 Created) |
+| **`GET`** | `/transactions/pending` | List active pending suggestions | None | `list[PendingTransactionResponse]` (200 OK) |
+| **`POST`** | `/transactions/{id}/accept` | Accept pending transaction | URL Parameter `id` | `ExpenseResponse` (200 OK) |
+| **`POST`** | `/transactions/{id}/ignore` | Ignore pending transaction | URL Parameter `id` | `PendingTransactionResponse` (200 OK) |
 
 ---
 
@@ -652,6 +713,10 @@ Evaluators can verify the application's functionality using this testing checkli
 - [ ] **Reset Filters**: Click the Reset button. Verify that all filter options clear and the full transaction list reloads.
 - [ ] **Edit Mode**: Click the blue Pencil icon. Confirm the form swaps to Edit Mode and loads the correct values.
 - [ ] **Delete Modal**: Click the red Trash icon. Verify the confirmation modal appears and that the item is removed only after clicking delete.
+- [ ] **Demo Generator (Single)**: Click the **Swiggy** or **Uber** button. Verify that the simulation toast appears, the suggestion is loaded into the **Smart Transaction Inbox**, and the pending badge count increases.
+- [ ] **Demo Generator (Full Day)**: Click **Simulate One Day of Spending**. Verify that 5 distinct transaction suggestion cards are loaded sequentially in the inbox.
+- [ ] **Accept Suggestion**: Click **Accept** on a suggestion card. Verify it is removed from the inbox, added to the ledger table, and updates the Monthly Summary chart.
+- [ ] **Ignore Suggestion**: Click **Ignore** on a suggestion card. Verify it is dismissed from the inbox.
 
 ---
 

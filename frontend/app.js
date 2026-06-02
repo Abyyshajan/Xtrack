@@ -138,6 +138,20 @@ function cacheDom() {
         smartTextError:        byId("smart-text-error"),
         smartExtractBtn:       byId("smart-extract-btn"),
         smartBtnText:          byId("smart-btn-text"),
+        smartQueueBtn:         byId("smart-queue-btn"),
+        smartQueueBtnText:     byId("smart-queue-btn-text"),
+
+        // Smart Transaction Inbox
+        inboxSection:          byId("inbox-section"),
+        inboxBadge:            byId("inbox-badge"),
+        inboxLoading:          byId("inbox-loading"),
+        inboxEmpty:            byId("inbox-empty"),
+        inboxList:             byId("inbox-list"),
+        inboxRefreshBtn:       byId("inbox-refresh-btn"),
+
+        // Demo Transaction Generator
+        demoSection:          byId("demo-section"),
+        simulateDayBtn:       byId("simulate-day-btn"),
     };
 }
 
@@ -1054,6 +1068,248 @@ async function handleSmartExtract() {
 }
 
 // ===========================================================================
+// Smart Transaction Inbox Logic
+// ===========================================================================
+
+/**
+ * Fetch and render all pending transaction suggestions in the inbox.
+ */
+async function loadInboxTransactions() {
+    $.inboxLoading.classList.remove("d-none");
+    $.inboxList.classList.add("d-none");
+    $.inboxEmpty.classList.add("d-none");
+
+    try {
+        const transactions = await api("/transactions/pending");
+        $.inboxLoading.classList.add("d-none");
+
+        if (transactions.length > 0) {
+            $.inboxSection.classList.remove("d-none");
+            $.inboxBadge.textContent = `${transactions.length} New`;
+            $.inboxEmpty.classList.add("d-none");
+            $.inboxList.classList.remove("d-none");
+
+            const cols = transactions.map(tx => {
+                const merchant = tx.merchant || "Unknown Merchant";
+                const amountText = tx.amount !== null ? `₹${formatAmount(tx.amount)}` : "—";
+                const dateText = formatDate(tx.transaction_date);
+                const rawMsg = tx.raw_message;
+                const category = tx.category || "Other";
+
+                return `
+                    <div class="col-md-6 col-lg-4 suggestion-item-fade">
+                        <div class="suggestion-card p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <div class="merchant-title text-truncate" style="max-width: 140px;" title="${escapeAttr(merchant)}">${merchant}</div>
+                                    <small class="text-muted">${dateText}</small>
+                                </div>
+                                <span class="badge badge-category badge-${category}">${category}</span>
+                            </div>
+                            <div class="amount-value mb-2">${amountText}</div>
+                            <div class="raw-message-box p-2 rounded mb-3 border-start border-3 border-secondary">
+                                ${escapeAttr(rawMsg)}
+                            </div>
+                            <div class="d-flex gap-2 mt-auto">
+                                <button class="btn btn-sm btn-accept-pill w-100" data-action="accept-tx" data-id="${tx.id}">
+                                    <i class="bi bi-check-lg me-1"></i>Accept
+                                </button>
+                                <button class="btn btn-sm btn-ignore-pill w-100" data-action="ignore-tx" data-id="${tx.id}">
+                                    <i class="bi bi-x-lg me-1"></i>Ignore
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+            $.inboxList.innerHTML = cols;
+        } else {
+            $.inboxSection.classList.add("d-none");
+            $.inboxList.innerHTML = "";
+        }
+    } catch (err) {
+        console.error("Error loading inbox:", err);
+        $.inboxLoading.classList.add("d-none");
+        showAlert(`Unable to load transactions inbox. ${err.message}`, "danger");
+    }
+}
+
+/**
+ * Handle queueing simulated transaction message to inbox instead of immediate form extract.
+ */
+async function handleQueueTransaction() {
+    clearFieldError($.smartTextInput, "smart-text-error");
+
+    const message = $.smartTextInput.value.trim();
+    if (!message) {
+        setFieldError($.smartTextInput, "smart-text-error", "Please enter a transaction message.");
+        return;
+    }
+
+    // Entering loading state
+    $.smartQueueBtn.disabled = true;
+    $.smartQueueBtnText.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Queueing...';
+
+    try {
+        await api("/transactions/detect", {
+            method: "POST",
+            body: { message }
+        });
+
+        showAlert("Transaction queued to Inbox successfully for review!", "success");
+        $.smartTextInput.value = ""; // clear textarea
+        updateNoteCounter();
+
+        // Refresh the inbox list dynamically
+        await loadInboxTransactions();
+    } catch (err) {
+        console.error("Queueing error:", err);
+        showAlert(`Unable to queue transaction. ${err.message}`, "danger");
+    } finally {
+        // Clear loading state
+        $.smartQueueBtn.disabled = false;
+        $.smartQueueBtnText.innerHTML = 'Queue to Inbox';
+    }
+}
+
+/**
+ * Handle accepting a transaction proposal.
+ */
+async function handleAcceptInboxTransaction(id) {
+    try {
+        await api(`/transactions/${id}/accept`, { method: "POST" });
+        showAlert("Transaction accepted and added as a real expense!", "success");
+        // Concurrently refresh inbox, main list, and monthly summary
+        await Promise.all([
+            loadInboxTransactions(),
+            loadExpenses(),
+            loadMonthlySummary()
+        ]);
+    } catch (err) {
+        showAlert(`Unable to accept transaction: ${err.message}`, "danger");
+    }
+}
+
+/**
+ * Handle ignoring a transaction suggestion.
+ */
+async function handleIgnoreInboxTransaction(id) {
+    try {
+        await api(`/transactions/${id}/ignore`, { method: "POST" });
+        showAlert("Transaction ignored and dismissed from Inbox.", "info");
+        await loadInboxTransactions();
+    } catch (err) {
+        showAlert(`Unable to ignore transaction: ${err.message}`, "danger");
+    }
+}
+
+// ===========================================================================
+// Demo Transaction Generator
+// ===========================================================================
+
+const demoTransactions = {
+    swiggy: "You have successfully paid Rs.320 to Swiggy using Google Pay. UPI Ref No. 5678901234.",
+    zomato: "Rs.450 spent on Zomato using UPI on 02-Jun-2026.",
+    uber: "INR 180 paid to Uber via UPI. Ref No: 987654321.",
+    amazon: "Rs.1499 debited for Amazon purchase. UPI Ref: 123456789.",
+    myntra: "PhonePe transaction successful. Rs.799 paid to Myntra.",
+    netflix: "Payment of Rs.649 successful to Netflix Subscription.",
+    electricity: "Rs.1200 paid towards Electricity Bill via UPI.",
+    starbucks: "INR 180 spent on Starbucks using credit card."
+};
+
+/**
+ * Handle generating a demo transaction (single click simulation).
+ */
+async function handleGenerateDemo(type) {
+    const buttons = document.querySelectorAll(".demo-btn, #simulate-day-btn");
+    buttons.forEach(btn => btn.disabled = true);
+
+    let selectedType = type;
+    if (selectedType === "random") {
+        const types = Object.keys(demoTransactions);
+        selectedType = types[Math.floor(Math.random() * types.length)];
+    }
+
+    const message = demoTransactions[selectedType];
+    if (!message) {
+        buttons.forEach(btn => btn.disabled = false);
+        return;
+    }
+
+    showAlert("Simulating Transaction Detection...", "info");
+
+    try {
+        await api("/transactions/detect", {
+            method: "POST",
+            body: { message }
+        });
+        showAlert("Demo transaction generated successfully.", "success");
+        await loadInboxTransactions();
+    } catch (err) {
+        console.error("Demo generation error:", err);
+        showAlert(`Unable to generate demo transaction. ${err.message}`, "danger");
+    } finally {
+        buttons.forEach(btn => btn.disabled = false);
+    }
+}
+
+/**
+ * Handle simulating one day of spending (multiple transactions).
+ */
+async function handleSimulateDay() {
+    const buttons = document.querySelectorAll(".demo-btn, #simulate-day-btn");
+    buttons.forEach(btn => btn.disabled = true);
+
+    const originalText = $.simulateDayBtn.innerHTML;
+    $.simulateDayBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Simulating...';
+
+    showAlert("Simulating One Day of Spending (generating 5 transactions)...", "info");
+
+    const batch = ["starbucks", "swiggy", "uber", "netflix", "amazon"];
+    let successCount = 0;
+
+    try {
+        for (const type of batch) {
+            const message = demoTransactions[type];
+            if (message) {
+                await api("/transactions/detect", {
+                    method: "POST",
+                    body: { message }
+                });
+                successCount++;
+            }
+        }
+        showAlert(`${successCount} demo transactions generated successfully.`, "success");
+        await loadInboxTransactions();
+    } catch (err) {
+        console.error("Simulation error:", err);
+        showAlert(`Simulation failed. Generated ${successCount} transactions. ${err.message}`, "danger");
+    } finally {
+        buttons.forEach(btn => btn.disabled = false);
+        $.simulateDayBtn.innerHTML = originalText;
+    }
+}
+
+
+/**
+ * Event delegation handler for click inside transaction inbox list.
+ */
+function handleInboxListClick(e) {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    const id = parseInt(btn.dataset.id, 10);
+
+    if (action === "accept-tx") {
+        handleAcceptInboxTransaction(id);
+    } else if (action === "ignore-tx") {
+        handleIgnoreInboxTransaction(id);
+    }
+}
+
+// ===========================================================================
 // Initialisation
 // ===========================================================================
 
@@ -1100,7 +1356,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if ($.smartExtractBtn) {
         $.smartExtractBtn.addEventListener("click", handleSmartExtract);
     }
+    if ($.smartQueueBtn) {
+        $.smartQueueBtn.addEventListener("click", handleQueueTransaction);
+    }
+
+    // Wire up Smart Transaction Inbox listeners
+    if ($.inboxRefreshBtn) {
+        $.inboxRefreshBtn.addEventListener("click", () => loadInboxTransactions());
+    }
+    if ($.inboxList) {
+        $.inboxList.addEventListener("click", handleInboxListClick);
+    }
+
+    // Wire up Demo Transaction Generator listeners
+    if ($.demoSection) {
+        $.demoSection.addEventListener("click", (e) => {
+            const btn = e.target.closest(".demo-btn");
+            if (btn) {
+                const type = btn.dataset.type;
+                handleGenerateDemo(type);
+            }
+        });
+    }
+    if ($.simulateDayBtn) {
+        $.simulateDayBtn.addEventListener("click", handleSimulateDay);
+    }
 
     // Load initial data concurrently
-    Promise.all([loadExpenses(), loadMonthlySummary()]);
+    Promise.all([loadExpenses(), loadMonthlySummary(), loadInboxTransactions()]);
 });

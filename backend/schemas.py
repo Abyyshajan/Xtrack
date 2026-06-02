@@ -84,3 +84,26 @@ class TransactionParseResponse(BaseModel):
     category: CategoryEnum = Field(..., description="Inferred category")
     date: dt.date = Field(..., description="Extracted date or today's date")
 
+
+# ---------------------------------------------------------------------------
+# Transaction Inbox schemas
+# ---------------------------------------------------------------------------
+
+class TransactionDetectRequest(BaseModel):
+    message: str = Field(..., description="Raw SMS alert text")
+
+
+class PendingTransactionResponse(BaseModel):
+    id: int
+    merchant: Optional[str]
+    amount: Optional[float]
+    category: CategoryEnum
+    transaction_date: dt.date
+    raw_message: str
+    status: str
+    created_at: dt.datetime
+    updated_at: dt.datetime
+
+    model_config = {"from_attributes": True}
+
+

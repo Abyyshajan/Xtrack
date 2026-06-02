@@ -125,6 +125,79 @@
     </section>
 
     <!-- ================================================================= -->
+    <!-- SMART TRANSACTION INBOX                                           -->
+    <!-- ================================================================= -->
+    <section class="container mt-4 d-none" id="inbox-section">
+        <div class="card inbox-card">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-mailbox me-2" aria-hidden="true"></i>Smart Transaction Inbox
+                    </h5>
+                    <span class="badge bg-danger ms-2" id="inbox-badge">0 New</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="inbox-refresh-btn" aria-label="Refresh Inbox">
+                    <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Refresh
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Loading state -->
+                <div id="inbox-loading" class="text-center py-4">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading inbox...</span>
+                    </div>
+                    <span class="ms-2 text-muted">Loading pending transactions...</span>
+                </div>
+
+                <!-- Empty state (optional or shown inside if 0) -->
+                <div id="inbox-empty" class="text-center py-4 d-none">
+                    <i class="bi bi-check-circle fs-2 text-success d-block mb-2" aria-hidden="true"></i>
+                    <p class="text-muted small mb-0">All transactions reviewed! Your inbox is empty.</p>
+                </div>
+
+                <!-- Suggestions container -->
+                <div class="row g-3" id="inbox-list">
+                    <!-- Cards will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- DEMO TRANSACTION GENERATOR                                        -->
+    <!-- ================================================================= -->
+    <section class="container mt-4" id="demo-section">
+        <div class="card demo-card">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="bi bi-flask me-2" aria-hidden="true"></i>Demo Transaction Generator
+                    </h5>
+                    <small class="text-muted">Generate realistic transaction notifications for testing purposes.</small>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="swiggy">Swiggy</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="zomato">Zomato</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="uber">Uber</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="amazon">Amazon</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="myntra">Myntra</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="netflix">Netflix</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="electricity">Electricity Bill</button>
+                    <button type="button" class="btn btn-sm btn-primary demo-btn" data-type="random">Random Transaction</button>
+                </div>
+                <hr class="my-3 text-muted-subtle">
+                <div class="d-grid">
+                    <button type="button" class="btn btn-outline-success" id="simulate-day-btn">
+                        <i class="bi bi-play-circle me-1" aria-hidden="true"></i>🎬 Simulate One Day of Spending
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================================================================= -->
     <!-- MAIN CONTENT                                                      -->
     <!-- ================================================================= -->
     <main class="container py-4">
@@ -151,10 +224,14 @@
                                       placeholder="Paste transaction message here...&#10;e.g., Rs.250 spent on Swiggy using UPI."></textarea>
                             <div class="invalid-feedback" id="smart-text-error">Please enter a transaction message.</div>
                         </div>
-                        <div class="d-grid">
+                        <div class="d-grid gap-2">
                             <button type="button" class="btn btn-primary" id="smart-extract-btn">
                                 <i class="bi bi-magic me-1" aria-hidden="true"></i>
                                 <span id="smart-btn-text">Extract Expense</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="smart-queue-btn">
+                                <i class="bi bi-mailbox me-1" aria-hidden="true"></i>
+                                <span id="smart-queue-btn-text">Queue to Inbox</span>
                             </button>
                         </div>
                     </div>

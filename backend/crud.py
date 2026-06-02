@@ -8,7 +8,7 @@ from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from models import Expense, CategoryEnum
+from models import Expense, CategoryEnum, PendingTransaction, StatusEnum
 
 
 # ---------------------------------------------------------------------------
@@ -116,3 +116,71 @@ def get_monthly_summary(db: Session, year: int, month: int) -> dict:
         "breakdown": breakdown,
         "count": count,
     }
+
+
+# ---------------------------------------------------------------------------
+# Pending Transactions (Inbox Suggestions)
+# ---------------------------------------------------------------------------
+
+def create_pending_transaction(db: Session, data: dict) -> PendingTransaction:
+    """Create a new pending transaction suggestion from parsed message details."""
+    date_val = data.get("transaction_date")
+    if isinstance(date_val, str):
+        try:
+            date_val = dt.datetime.strptime(date_val, "%Y-%m-%d").date()
+        except ValueError:
+            date_val = dt.date.today()
+    elif not date_val:
+        date_val = dt.date.today()
+
+    pt = PendingTransaction(
+        merchant=data.get("merchant"),
+        amount=data.get("amount"),
+        category=CategoryEnum(data.get("category", "Other")),
+        transaction_date=date_val,
+        raw_message=data.get("raw_message", ""),
+        status=StatusEnum.pending
+    )
+    db.add(pt)
+    db.commit()
+    db.refresh(pt)
+    return pt
+
+
+def get_pending_transactions(db: Session) -> list[PendingTransaction]:
+    """Retrieve all suggestions currently in pending status."""
+    return db.query(PendingTransaction).filter(PendingTransaction.status == StatusEnum.pending).order_by(PendingTransaction.created_at.desc()).all()
+
+
+def get_pending_transaction(db: Session, transaction_id: int) -> Optional[PendingTransaction]:
+    """Retrieve a single suggestion by its primary key ID."""
+    return db.query(PendingTransaction).filter(PendingTransaction.id == transaction_id).first()
+
+
+def accept_pending_transaction(db: Session, pt: PendingTransaction) -> Expense:
+    """Convert a suggestion to an actual Expense entry and mark it accepted."""
+    pt.status = StatusEnum.accepted
+    
+    title = pt.merchant or "Unknown Merchant"
+    amount = pt.amount if pt.amount is not None else 0.0
+
+    expense = Expense(
+        title=title,
+        amount=amount,
+        category=pt.category,
+        date=pt.transaction_date,
+        note=f"Parsed from: {pt.raw_message}"
+    )
+    db.add(expense)
+    db.commit()
+    db.refresh(expense)
+    return expense
+
+
+def ignore_pending_transaction(db: Session, pt: PendingTransaction) -> PendingTransaction:
+    """Mark a suggestion as ignored."""
+    pt.status = StatusEnum.ignored
+    db.commit()
+    db.refresh(pt)
+    return pt
+

@@ -339,5 +339,149 @@ body {
     transition: all 0.3s ease;
 }
 
+/* ---- Smart Transaction Inbox ---- */
+.inbox-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(79, 70, 229, 0.15);
+}
+
+.inbox-card .card-header {
+    background: linear-gradient(135deg, rgba(238, 242, 255, 0.8) 0%, rgba(224, 231, 255, 0.8) 100%);
+    border-bottom: 1px solid rgba(79, 70, 229, 0.15);
+}
+
+/* Suggestion Card */
+.suggestion-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.suggestion-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.08);
+    border-color: rgba(79, 70, 229, 0.3);
+}
+
+.suggestion-card .raw-message-box {
+    background-color: #f8fafc;
+    border-left: 3px solid #cbd5e1;
+    font-size: 0.82rem;
+    font-family: var(--bs-font-monospace);
+    color: #475569;
+}
+
+.suggestion-card .merchant-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.suggestion-card .amount-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--app-primary);
+}
+
+/* Suggestion card entry animation */
+.suggestion-item-fade {
+    animation: suggestionFadeIn 0.35s ease-out forwards;
+}
+
+@keyframes suggestionFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.btn-accept-pill {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 0.35rem 1rem;
+    font-size: 0.85rem;
+    transition: background-color var(--transition-fast);
+}
+
+.btn-accept-pill:hover,
+.btn-accept-pill:focus {
+    background-color: #059669;
+    border-color: #059669;
+    color: #ffffff;
+}
+
+.btn-ignore-pill {
+    background-color: transparent;
+    border-color: #cbd5e1;
+    color: #64748b;
+    font-weight: 500;
+    border-radius: 20px;
+    padding: 0.35rem 1rem;
+    font-size: 0.85rem;
+    transition: all var(--transition-fast);
+}
+
+.btn-ignore-pill:hover,
+.btn-ignore-pill:focus {
+    background-color: #f1f5f9;
+    color: #334155;
+    border-color: #94a3b8;
+}
+
+/* ---- Demo Transaction Generator ---- */
+.demo-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px dashed rgba(16, 185, 129, 0.3);
+}
+
+.demo-card .card-header {
+    background: linear-gradient(135deg, rgba(236, 253, 245, 0.8) 0%, rgba(209, 250, 229, 0.8) 100%);
+    border-bottom: 1px dashed rgba(16, 185, 129, 0.2);
+}
+
+.demo-card .demo-btn {
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.35rem 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.demo-card .demo-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(79, 70, 229, 0.12);
+}
+
+.demo-card .demo-btn:active {
+    transform: translateY(0);
+}
+
+#simulate-day-btn {
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    transition: all 0.25s ease;
+}
+
+#simulate-day-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
 
 
