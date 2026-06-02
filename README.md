@@ -77,7 +77,7 @@ python -m http.server 3000
 
 ## 🛠️ Tradeoffs Made
 
-Due to the **2-hour constraint**, specific decisions were made to prioritize modularity, usability, and speed without sacrificing architectural integrity:
+Due to the, specific decisions were made to prioritize modularity, usability, and speed without sacrificing architectural integrity:
 1. **SQLite Database Model**: SQLite was selected over PostgreSQL because it requires zero local setup, zero credential configuration, and stores data in a simple, portable local file (`expense.db`), making it extremely simple to deploy and evaluate immediately.
 2. **Client-Side/Memory Charting**: The doughnut charts and category aggregations are compiled on the server per request, but rendered client-side dynamically. This avoids heavy server-side chart rendering and keeps network payloads light.
 3. **No Heavy Frontend Frameworks (React/Vue)**: Built using standard vanilla JavaScript, HTML5, and standard Bootstrap 5. This eliminated compilation pipelines (Vite/Webpack), reducing dependencies to zero and assuring immediate, zero-lag browser testing.
