@@ -68,3 +68,19 @@ class MonthlySummary(BaseModel):
     total: float
     breakdown: dict[str, float]  # category -> sum
     count: int
+
+
+# ---------------------------------------------------------------------------
+# Smart Parser schemas
+# ---------------------------------------------------------------------------
+
+class TransactionParseRequest(BaseModel):
+    message: str = Field(..., description="Raw transaction message or SMS")
+
+
+class TransactionParseResponse(BaseModel):
+    title: str = Field(..., description="Extracted merchant or title")
+    amount: Optional[float] = Field(None, description="Extracted transaction amount")
+    category: CategoryEnum = Field(..., description="Inferred category")
+    date: dt.date = Field(..., description="Extracted date or today's date")
+

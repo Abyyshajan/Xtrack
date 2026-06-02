@@ -322,4 +322,22 @@ body {
     border-color: #cbd5e1;
 }
 
+/* ---- Smart Expense Detection ---- */
+.smart-detect-card {
+    background-color: #ffffff;
+    border: 1px dashed var(--app-primary);
+}
+
+.smart-detect-card .card-header {
+    background-color: rgba(79, 70, 229, 0.03);
+    border-bottom: 1px dashed rgba(79, 70, 229, 0.15);
+}
+
+.highlighted-field {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 0.2rem rgba(16, 185, 129, 0.25) !important;
+    transition: all 0.3s ease;
+}
+
+
 

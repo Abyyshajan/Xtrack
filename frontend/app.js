@@ -132,6 +132,12 @@ function cacheDom() {
         chartContainer:        byId("chart-container"),
         chartEmpty:            byId("chart-empty"),
         categoryChart:         byId("category-chart"),
+
+        // Smart Expense Detection
+        smartTextInput:        byId("smart-text-input"),
+        smartTextError:        byId("smart-text-error"),
+        smartExtractBtn:       byId("smart-extract-btn"),
+        smartBtnText:          byId("smart-btn-text"),
     };
 }
 
@@ -381,6 +387,9 @@ function setupLiveValidationClearing() {
     $.category.addEventListener("change", () => clearFieldError($.category, "category-error"));
     $.date.addEventListener("input", () => clearFieldError($.date, "date-error"));
     $.note.addEventListener("input", updateNoteCounter);
+    if ($.smartTextInput) {
+        $.smartTextInput.addEventListener("input", () => clearFieldError($.smartTextInput, "smart-text-error"));
+    }
 }
 
 // ===========================================================================
@@ -979,6 +988,72 @@ function setupFilterListeners() {
 }
 
 // ===========================================================================
+// Smart Expense Detection Parser
+// ===========================================================================
+
+async function handleSmartExtract() {
+    clearFieldError($.smartTextInput, "smart-text-error");
+
+    const message = $.smartTextInput.value.trim();
+    if (!message) {
+        setFieldError($.smartTextInput, "smart-text-error", "Please enter a transaction message.");
+        return;
+    }
+
+    // Entering loading state
+    $.smartExtractBtn.disabled = true;
+    $.smartBtnText.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Analyzing transaction...';
+
+    try {
+        const data = await api("/parse-transaction", {
+            method: "POST",
+            body: { message }
+        });
+
+        // Fill form fields
+        $.title.value = data.title || "";
+        $.amount.value = data.amount !== null ? data.amount : "";
+        $.category.value = data.category || "";
+        $.date.value = data.date;
+        $.note.value = message;
+        updateNoteCounter();
+
+        // Clear live form validation errors if any fields had errors
+        clearFieldError($.title, "title-error");
+        clearAmountError();
+        clearFieldError($.category, "category-error");
+        clearFieldError($.date, "date-error");
+
+        // Display user-friendly alerts based on what was found
+        if (!data.title && data.amount === null) {
+            showAlert("Transaction details parsed, but unable to detect merchant or amount. Please enter them manually.", "warning");
+        } else if (!data.title) {
+            showAlert("Transaction details parsed. Please confirm the merchant title manually.", "info");
+        } else if (data.amount === null) {
+            showAlert("Transaction details parsed. Please confirm the amount manually.", "info");
+        } else {
+            showAlert("Expense details extracted successfully!", "success");
+        }
+
+        // Highlight fields
+        const fields = [$.title, $.amount, $.category, $.date, $.note];
+        fields.forEach(el => el.classList.add("highlighted-field"));
+
+        setTimeout(() => {
+            fields.forEach(el => el.classList.remove("highlighted-field"));
+        }, 2500);
+
+    } catch (err) {
+        console.error("Extraction error:", err);
+        showAlert(`Unable to parse transaction. ${err.message}`, "danger");
+    } finally {
+        // Clear loading state
+        $.smartExtractBtn.disabled = false;
+        $.smartBtnText.innerHTML = 'Extract Expense';
+    }
+}
+
+// ===========================================================================
 // Initialisation
 // ===========================================================================
 
@@ -1019,6 +1094,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if ($.summaryNextMonth) {
         $.summaryNextMonth.addEventListener("click", () => shiftSummaryMonth(1));
+    }
+
+    // Wire up Smart Expense Detection listener
+    if ($.smartExtractBtn) {
+        $.smartExtractBtn.addEventListener("click", handleSmartExtract);
     }
 
     // Load initial data concurrently

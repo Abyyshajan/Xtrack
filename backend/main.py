@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from database import Base, engine
 from routes.expenses import router as expenses_router
+from schemas import TransactionParseRequest, TransactionParseResponse
+from parser import parse_message
 
 # Create all tables on startup (idempotent)
 Base.metadata.create_all(bind=engine)
@@ -30,6 +32,12 @@ app.add_middleware(
 )
 
 app.include_router(expenses_router)
+
+
+@app.post("/parse-transaction", response_model=TransactionParseResponse, tags=["AI Parser"])
+def parse_transaction(payload: TransactionParseRequest):
+    """Parse raw transaction messages to automatically extract expense properties."""
+    return parse_message(payload.message)
 
 
 @app.get("/", tags=["Health"])
