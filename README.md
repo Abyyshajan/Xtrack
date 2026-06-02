@@ -156,47 +156,6 @@ We chose a balanced, high-efficiency stack to deliver rapid responsiveness and r
 
 ---
 
-## 📐 System Architecture
-
-XTrack follows a highly decoupled **three-tier client-server architecture** with separate Presentation, Application, and Data layers.
-
-```mermaid
-graph TD
-    %% Styling
-    classDef client fill:#dbeafe,stroke:#1e40af,stroke-width:2px;
-    classDef server fill:#fef3c7,stroke:#92400e,stroke-width:2px;
-    classDef db fill:#ecfdf5,stroke:#065f46,stroke-width:2px;
-
-    %% Elements
-    subgraph Presentation Layer (Client)
-        HTML[index.html (Semantic UI)]
-        CSS[styles.css (Glassmorphism)]
-        JS[app.js (State & API Fetch)]
-        Chart[Chart.js (Doughnut Graph)]
-    end
-    class HTML,CSS,JS,Chart client;
-
-    subgraph Application Layer (API Server)
-        FA[FastAPI Router]
-        Pydantic[Pydantic Schema Validation]
-        CRUD[crud.py (Query Compiler)]
-    end
-    class FA,Pydantic,CRUD server;
-
-    subgraph Database Layer (Storage)
-        SQLite[(expense.db)]
-        SQLA[SQLAlchemy Engine]
-    end
-    class SQLite,SQLA db;
-
-    %% Data Flow
-    JS -- "Asynchronous HTTP Fetch (JSON)" --> FA
-    FA --> Pydantic
-    Pydantic --> CRUD
-    CRUD --> SQLA
-    SQLA --> SQLite
-```
-
 ### Data Flow Execution Step-by-Step
 1. **User Action (Smart Detection)**: The user pastes an UPI text alert (e.g. `"Rs.250 paid to Swiggy"`) in the smart text card and clicks Extract.
 2. **AI API Dispatch**: The client posts the message to `POST /parse-transaction` where a lightweight backend NLP parser parses properties.
