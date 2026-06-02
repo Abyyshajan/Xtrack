@@ -75,7 +75,7 @@ python -m http.server 3000
 
 ---
 
-## 🛠️ Senior Engineer Tradeoffs Made
+## 🛠️ Tradeoffs Made
 
 Due to the **2-hour constraint**, specific decisions were made to prioritize modularity, usability, and speed without sacrificing architectural integrity:
 1. **SQLite Database Model**: SQLite was selected over PostgreSQL because it requires zero local setup, zero credential configuration, and stores data in a simple, portable local file (`expense.db`), making it extremely simple to deploy and evaluate immediately.
