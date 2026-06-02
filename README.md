@@ -1,4 +1,4 @@
-# 🪙 XTrack — Personal Expense Tracker
+# 🪙 ExpenseAI – Smart Expense Tracking & Transaction Intelligence
 
 A premium, full-stack personal finance application built to track daily expenses, manage budgets, and visualize spending patterns. XTrack provides users with real-time monthly analytics, multi-criteria filtering, and a robust CRUD transaction system through a modern, glassmorphic, and accessible user interface.
 
