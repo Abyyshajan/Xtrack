@@ -64,30 +64,6 @@ Clicking the red **Trash** icon triggers a custom, secure Bootstrap confirmation
 
 ---
 
-## 📸 Screenshots Section
-
-### Dashboard
-![Dashboard Placeholder](https://raw.githubusercontent.com/Abyyshajan/Xtrack/main/screenshots/dashboard_mockup.png)
-*Figure 1: Main Application Interface showing the Monthly Summary, Doughnut Chart, Add/Edit Expense Form, and Filterable Transaction Table.*
-
-### Add Expense Form
-![Add Expense Form](https://raw.githubusercontent.com/Abyyshajan/Xtrack/main/screenshots/add_expense_mockup.png)
-*Figure 2: Form validation error handling and normal creation mode.*
-
-### Expense Table
-![Expense Table](https://raw.githubusercontent.com/Abyyshajan/Xtrack/main/screenshots/expense_table_mockup.png)
-*Figure 3: Interactive transaction ledger with action icons (edit/delete) and custom category badges.*
-
-### Filtering
-![Filtering](https://raw.githubusercontent.com/Abyyshajan/Xtrack/main/screenshots/filtering_mockup.png)
-*Figure 4: Filter system in action combining instant category filtering and range boundaries.*
-
-### Monthly Summary Selector
-![Monthly Summary](https://raw.githubusercontent.com/Abyyshajan/Xtrack/main/screenshots/monthly_summary_mockup.png)
-*Figure 5: Polished month input selector with navigation step controls for deep analytical review.*
-
----
-
 ## 🛠️ Technology Stack
 
 We chose a balanced, high-efficiency stack to deliver rapid responsiveness and robust data security with minimal deployment friction.
