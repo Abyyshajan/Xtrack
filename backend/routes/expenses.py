@@ -3,9 +3,10 @@ Expense API endpoints.
 """
 
 import datetime as dt
+import json
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -13,6 +14,7 @@ from models import CategoryEnum
 from schemas import ExpenseCreate, ExpenseUpdate, ExpenseResponse, MonthlySummary
 import crud
 
+# Define router for expense resources
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
 
 
@@ -21,6 +23,7 @@ router = APIRouter(prefix="/expenses", tags=["Expenses"])
 # ---------------------------------------------------------------------------
 
 def _get_expense_or_404(db: Session, expense_id: int) -> "Expense":
+    """Helper function to fetch an expense or raise a 404 HTTP Exception."""
     expense = crud.get_expense(db, expense_id)
     if expense is None:
         raise HTTPException(status_code=404, detail=f"Expense with id {expense_id} not found")
@@ -34,11 +37,13 @@ def _get_expense_or_404(db: Session, expense_id: int) -> "Expense":
 @router.post("/", response_model=ExpenseResponse, status_code=201)
 def create_expense(payload: ExpenseCreate, db: Session = Depends(get_db)):
     """Create a new expense."""
+    # Convert validated request payload to a dictionary and persist it
     return crud.create_expense(db, payload.model_dump())
 
 
 @router.get("/", response_model=list[ExpenseResponse])
 def list_expenses(
+    response: Response,
     category: Optional[CategoryEnum] = Query(None, description="Filter by exact category"),
     title: Optional[str] = Query(None, description="Case-insensitive partial title match"),
     from_date: Optional[dt.date] = Query(None, description="Inclusive start date"),
@@ -46,11 +51,19 @@ def list_expenses(
     db: Session = Depends(get_db),
 ):
     """List expenses with optional filters. Sorted by most recent date first."""
+    # Guard clause: Ensure start date is not after end date
     if from_date and to_date and from_date > to_date:
         raise HTTPException(
             status_code=400,
             detail="from_date must be on or before to_date",
         )
+
+    # Expose allowed categories via custom response header to save extra API roundtrips
+    categories = [c.value for c in CategoryEnum]
+    response.headers["X-Categories"] = json.dumps(categories)
+    response.headers["Access-Control-Expose-Headers"] = "X-Categories"
+
+    # Query matching records from the database using filtering arguments
     return crud.get_expenses(db, category=category, title=title, from_date=from_date, to_date=to_date)
 
 
@@ -62,28 +75,36 @@ def monthly_summary(
 ):
     """Monthly spending summary — total + category breakdown."""
     today = dt.date.today()
+    # Query database for aggregated metrics for the specified/current year and month
     return crud.get_monthly_summary(db, year or today.year, month or today.month)
 
 
 @router.get("/{expense_id}", response_model=ExpenseResponse)
 def get_expense(expense_id: int, db: Session = Depends(get_db)):
     """Get a single expense by ID."""
+    # Return expense detail or 404 response
     return _get_expense_or_404(db, expense_id)
 
 
 @router.put("/{expense_id}", response_model=ExpenseResponse)
 def update_expense(expense_id: int, payload: ExpenseUpdate, db: Session = Depends(get_db)):
     """Update an existing expense. Only supplied fields are changed."""
+    # Retrieve target expense, raising 404 if not found
     expense = _get_expense_or_404(db, expense_id)
+    # Extract only the fields explicitly provided in the request
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
+    # Apply changes and persist to the database
     return crud.update_expense(db, expense, updates)
 
 
 @router.delete("/{expense_id}", status_code=200)
 def delete_expense(expense_id: int, db: Session = Depends(get_db)):
     """Delete an expense."""
+    # Retrieve target expense, raising 404 if not found
     expense = _get_expense_or_404(db, expense_id)
+    # Perform deletion from database
     crud.delete_expense(db, expense)
     return {"detail": f"Expense {expense_id} deleted"}
+

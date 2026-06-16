@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,7 @@
     <!-- Chart.js (CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
 
     <!-- ================================================================= -->
@@ -51,11 +53,15 @@
                     <small class="text-muted" id="summary-subtitle">Monthly Spending Overview</small>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="summary-prev-month" aria-label="Previous Month">
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="summary-prev-month"
+                        aria-label="Previous Month">
                         <i class="bi bi-chevron-left" aria-hidden="true"></i>
                     </button>
-                    <input type="month" id="summary-month-select" class="form-control form-control-sm border-secondary-subtle font-monospace fw-semibold" style="max-width: 160px;" aria-label="Select Summary Month">
-                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="summary-next-month" aria-label="Next Month">
+                    <input type="month" id="summary-month-select"
+                        class="form-control form-control-sm border-secondary-subtle font-monospace fw-semibold"
+                        style="max-width: 160px;" aria-label="Select Summary Month">
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" id="summary-next-month"
+                        aria-label="Next Month">
                         <i class="bi bi-chevron-right" aria-hidden="true"></i>
                     </button>
                 </div>
@@ -86,7 +92,8 @@
                         <div class="col-md-7">
                             <!-- Total card -->
                             <div class="summary-total-card mb-3">
-                                <div class="text-muted small text-uppercase fw-semibold mb-1" id="summary-total-label">Total Spent This Month</div>
+                                <div class="text-muted small text-uppercase fw-semibold mb-1" id="summary-total-label">
+                                    Total Spent This Month</div>
                                 <div class="summary-total-amount" id="summary-total">₹0</div>
                                 <div class="text-muted small" id="summary-count-label">0 expenses</div>
                             </div>
@@ -136,7 +143,8 @@
                     </h5>
                     <span class="badge bg-danger ms-2" id="inbox-badge">0 New</span>
                 </div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="inbox-refresh-btn" aria-label="Refresh Inbox">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="inbox-refresh-btn"
+                    aria-label="Refresh Inbox">
                     <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>Refresh
                 </button>
             </div>
@@ -178,14 +186,21 @@
             </div>
             <div class="card-body">
                 <div class="d-flex flex-wrap gap-2 mb-3">
-                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="swiggy">Swiggy</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="zomato">Zomato</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn"
+                        data-type="swiggy">Swiggy</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn"
+                        data-type="zomato">Zomato</button>
                     <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="uber">Uber</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="amazon">Amazon</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="myntra">Myntra</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="netflix">Netflix</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn" data-type="electricity">Electricity Bill</button>
-                    <button type="button" class="btn btn-sm btn-primary demo-btn" data-type="random">Random Transaction</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn"
+                        data-type="amazon">Amazon</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn"
+                        data-type="myntra">Myntra</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn"
+                        data-type="netflix">Netflix</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary demo-btn"
+                        data-type="electricity">Electricity Bill</button>
+                    <button type="button" class="btn btn-sm btn-primary demo-btn" data-type="random">Random
+                        Transaction</button>
                 </div>
                 <hr class="my-3 text-muted-subtle">
                 <div class="d-grid">
@@ -207,7 +222,7 @@
             <!-- EXPENSE FORM                                              -->
             <!-- --------------------------------------------------------- -->
             <div class="col-lg-4">
-                
+
                 <!-- ~~~~~ SMART DETECT CARD ~~~~~ -->
                 <div class="card mb-3 smart-detect-card">
                     <div class="card-header">
@@ -220,9 +235,10 @@
                             Paste a transaction message and let the system extract expense details automatically.
                         </p>
                         <div class="mb-3">
-                            <textarea id="smart-text-input" class="form-control" rows="3" 
-                                      placeholder="Paste transaction message here...&#10;e.g., Rs.250 spent on Swiggy using UPI."></textarea>
-                            <div class="invalid-feedback" id="smart-text-error">Please enter a transaction message.</div>
+                            <textarea id="smart-text-input" class="form-control" rows="3"
+                                placeholder="Paste transaction message here...&#10;e.g., Rs.250 spent on Swiggy using UPI."></textarea>
+                            <div class="invalid-feedback" id="smart-text-error">Please enter a transaction message.
+                            </div>
                         </div>
                         <div class="d-grid gap-2">
                             <button type="button" class="btn btn-primary" id="smart-extract-btn">
@@ -252,8 +268,7 @@
                             <div class="mb-3">
                                 <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="title"
-                                       placeholder="e.g. Coffee at Starbucks"
-                                       maxlength="100" required>
+                                    placeholder="e.g. Coffee at Starbucks" maxlength="100" required>
                                 <div class="invalid-feedback" id="title-error">Title is required.</div>
                             </div>
 
@@ -262,23 +277,19 @@
                                 <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" class="form-control" id="amount"
-                                           placeholder="0.00" step="0.01" min="0.01" required>
+                                    <input type="number" class="form-control" id="amount" placeholder="0.00" step="0.01"
+                                        min="0.01" required>
                                 </div>
-                                <div class="invalid-feedback d-block-on-error" id="amount-error">Amount must be greater than 0.</div>
+                                <div class="invalid-feedback d-block-on-error" id="amount-error">Amount must be greater
+                                    than 0.</div>
                             </div>
 
                             <!-- Category -->
                             <div class="mb-3">
-                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                <label for="category" class="form-label">Category <span
+                                        class="text-danger">*</span></label>
                                 <select class="form-select" id="category" required>
                                     <option value="">Select category...</option>
-                                    <option value="Food">Food</option>
-                                    <option value="Transport">Transport</option>
-                                    <option value="Shopping">Shopping</option>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Other">Other</option>
                                 </select>
                                 <div class="invalid-feedback" id="category-error">Please select a category.</div>
                             </div>
@@ -293,8 +304,8 @@
                             <!-- Note (V2 fix: character counter) -->
                             <div class="mb-3">
                                 <label for="note" class="form-label">Note</label>
-                                <textarea class="form-control" id="note" rows="2"
-                                          placeholder="Optional note..." maxlength="1000"></textarea>
+                                <textarea class="form-control" id="note" rows="2" placeholder="Optional note..."
+                                    maxlength="1000"></textarea>
                                 <div class="form-text text-end note-counter">
                                     <span id="note-count">0</span> / 1000
                                 </div>
@@ -337,9 +348,10 @@
                             <div class="col-md-6">
                                 <label for="filter-title" class="form-label form-label-sm">Title</label>
                                 <div class="input-group input-group-sm">
-                                    <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+                                    <span class="input-group-text"><i class="bi bi-search"
+                                            aria-hidden="true"></i></span>
                                     <input type="text" class="form-control" id="filter-title"
-                                           placeholder="Search by title..." autocomplete="off">
+                                        placeholder="Search by title..." autocomplete="off">
                                 </div>
                             </div>
                             <!-- Category -->
@@ -347,12 +359,6 @@
                                 <label for="filter-category" class="form-label form-label-sm">Category</label>
                                 <select class="form-select form-select-sm" id="filter-category">
                                     <option value="">All Categories</option>
-                                    <option value="Food">Food</option>
-                                    <option value="Transport">Transport</option>
-                                    <option value="Shopping">Shopping</option>
-                                    <option value="Bills">Bills</option>
-                                    <option value="Entertainment">Entertainment</option>
-                                    <option value="Other">Other</option>
                                 </select>
                             </div>
                             <!-- From date -->
@@ -367,7 +373,8 @@
                             </div>
                         </div>
                         <!-- Date range validation warning -->
-                        <div class="alert alert-warning py-1 px-2 mt-2 mb-0 small d-none" id="filter-date-warning" role="alert">
+                        <div class="alert alert-warning py-1 px-2 mt-2 mb-0 small d-none" id="filter-date-warning"
+                            role="alert">
                             <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
                             "From Date" must be on or before "To Date".
                         </div>
@@ -394,9 +401,11 @@
                         <!-- Empty state -->
                         <div id="empty-state" class="d-none p-4">
                             <div class="alert alert-light text-center border-0 mb-0">
-                                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted" id="empty-state-icon" aria-hidden="true"></i>
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted" id="empty-state-icon"
+                                    aria-hidden="true"></i>
                                 <p class="mb-1 text-muted" id="empty-state-text">No expenses recorded yet.</p>
-                                <button type="button" class="btn btn-sm btn-outline-primary d-none" id="empty-reset-filters-btn">
+                                <button type="button" class="btn btn-sm btn-outline-primary d-none"
+                                    id="empty-reset-filters-btn">
                                     <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Reset Filters
                                 </button>
                             </div>
@@ -456,4 +465,5 @@
     <!-- Application JS -->
     <script src="app.js"></script>
 </body>
+
 </html>

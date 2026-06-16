@@ -22,13 +22,72 @@ const DEBOUNCE_MS = 500;       // delay before title search fires
 
 // Category colors for the Chart.js doughnut chart and legend dots
 const categoryColors = {
-    Food:          "#f59e0b", // Amber
-    Transport:     "#3b82f6", // Blue
-    Shopping:      "#ec4899", // Pink
-    Bills:         "#ef4444", // Red
+    Food: "#f59e0b", // Amber
+    Transport: "#3b82f6", // Blue
+    Shopping: "#ec4899", // Pink
+    Bills: "#ef4444", // Red
     Entertainment: "#8b5cf6", // Purple
-    Other:         "#64748b", // Slate
+    Other: "#64748b", // Slate
 };
+
+const predefinedCategories = ["Food", "Transport", "Shopping", "Bills", "Entertainment", "Other"];
+
+function getCategoryColor(category) {
+    if (categoryColors[category]) {
+        return categoryColors[category];
+    }
+    // Generate a stable color using a simple hash of the string
+    let hash = 0;
+    for (let i = 0; i < category.length; i++) {
+        hash = category.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const colors = [
+        "#10b981", // Emerald
+        "#06b6d4", // Cyan
+        "#f97316", // Orange
+        "#84cc16", // Lime
+        "#14b8a6", // Teal
+        "#6366f1", // Indigo
+        "#a855f7", // Purple-light
+        "#eab308", // Yellow
+    ];
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+}
+
+function getCategoryBadgeHTML(category) {
+    if (predefinedCategories.includes(category)) {
+        return `<span class="badge badge-category badge-${category}">${category}</span>`;
+    } else {
+        const color = getCategoryColor(category);
+        return `<span class="badge badge-category" style="background-color: ${color}1a; color: ${color}; border: 1px solid ${color}33;">${category}</span>`;
+    }
+}
+
+
+function populateCategorySelects(categories) {
+    // 1. Form category select
+    if ($.category) {
+        $.category.innerHTML = '<option value="">Select category...</option>';
+        for (const cat of categories) {
+            const opt = document.createElement("option");
+            opt.value = cat;
+            opt.textContent = cat;
+            $.category.appendChild(opt);
+        }
+    }
+
+    // 2. Filter category select
+    if ($.filterCategory) {
+        $.filterCategory.innerHTML = '<option value="">All Categories</option>';
+        for (const cat of categories) {
+            const opt = document.createElement("option");
+            opt.value = cat;
+            opt.textContent = cat;
+            $.filterCategory.appendChild(opt);
+        }
+    }
+}
 
 // ===========================================================================
 // State
@@ -73,85 +132,85 @@ function cacheDom() {
     const byId = (id) => document.getElementById(id);
     $ = {
         // Expense form
-        form:             byId("expense-form"),
-        formCard:         document.querySelector(".form-card"),
-        formTitle:        byId("form-title"),
-        expenseId:        byId("expense-id"),
-        title:            byId("title"),
-        amount:           byId("amount"),
-        category:         byId("category"),
-        date:             byId("date"),
-        note:             byId("note"),
-        noteCount:        byId("note-count"),
-        submitBtn:        byId("submit-btn"),
-        submitBtnText:    byId("submit-btn-text"),
-        resetBtn:         byId("reset-btn"),
-        resetBtnText:     byId("reset-btn-text"),
-        alertContainer:   byId("alert-container"),
-        amountError:      byId("amount-error"),
+        form: byId("expense-form"),
+        formCard: document.querySelector(".form-card"),
+        formTitle: byId("form-title"),
+        expenseId: byId("expense-id"),
+        title: byId("title"),
+        amount: byId("amount"),
+        category: byId("category"),
+        date: byId("date"),
+        note: byId("note"),
+        noteCount: byId("note-count"),
+        submitBtn: byId("submit-btn"),
+        submitBtnText: byId("submit-btn-text"),
+        resetBtn: byId("reset-btn"),
+        resetBtnText: byId("reset-btn-text"),
+        alertContainer: byId("alert-container"),
+        amountError: byId("amount-error"),
 
         // Table
-        loadingSpinner:   byId("loading-spinner"),
-        emptyState:       byId("empty-state"),
-        emptyStateText:   byId("empty-state-text"),
-        emptyStateIcon:   byId("empty-state-icon"),
-        emptyResetBtn:    byId("empty-reset-filters-btn"),
-        expenseTable:     byId("expense-table"),
-        expenseTbody:     byId("expense-tbody"),
-        expenseCount:     byId("expense-count"),
+        loadingSpinner: byId("loading-spinner"),
+        emptyState: byId("empty-state"),
+        emptyStateText: byId("empty-state-text"),
+        emptyStateIcon: byId("empty-state-icon"),
+        emptyResetBtn: byId("empty-reset-filters-btn"),
+        expenseTable: byId("expense-table"),
+        expenseTbody: byId("expense-tbody"),
+        expenseCount: byId("expense-count"),
 
         // Delete modal
-        deleteModal:      byId("delete-modal"),
-        deleteTitle:      byId("delete-expense-title"),
+        deleteModal: byId("delete-modal"),
+        deleteTitle: byId("delete-expense-title"),
         confirmDeleteBtn: byId("confirm-delete-btn"),
 
         // Filters
-        filterCard:       document.querySelector(".filter-card"),
-        filterTitle:      byId("filter-title"),
-        filterCategory:   byId("filter-category"),
-        filterFromDate:   byId("filter-from-date"),
-        filterToDate:     byId("filter-to-date"),
-        filterDateWarning:byId("filter-date-warning"),
-        resetFiltersBtn:  byId("reset-filters-btn"),
+        filterCard: document.querySelector(".filter-card"),
+        filterTitle: byId("filter-title"),
+        filterCategory: byId("filter-category"),
+        filterFromDate: byId("filter-from-date"),
+        filterToDate: byId("filter-to-date"),
+        filterDateWarning: byId("filter-date-warning"),
+        resetFiltersBtn: byId("reset-filters-btn"),
 
         // Monthly Summary Dashboard
-        summarySection:        byId("summary-section"),
-        summarySubtitle:       byId("summary-subtitle"),
-        summaryMonthSelect:    byId("summary-month-select"),
-        summaryPrevMonth:      byId("summary-prev-month"),
-        summaryNextMonth:      byId("summary-next-month"),
-        summaryTotalLabel:     byId("summary-total-label"),
-        summaryLoading:        byId("summary-loading"),
-        summaryError:          byId("summary-error"),
-        summaryErrorText:      byId("summary-error-text"),
-        summaryContent:        byId("summary-content"),
-        summaryTotal:          byId("summary-total"),
-        summaryCountLabel:     byId("summary-count-label"),
-        summaryBreakdown:      byId("summary-breakdown"),
+        summarySection: byId("summary-section"),
+        summarySubtitle: byId("summary-subtitle"),
+        summaryMonthSelect: byId("summary-month-select"),
+        summaryPrevMonth: byId("summary-prev-month"),
+        summaryNextMonth: byId("summary-next-month"),
+        summaryTotalLabel: byId("summary-total-label"),
+        summaryLoading: byId("summary-loading"),
+        summaryError: byId("summary-error"),
+        summaryErrorText: byId("summary-error-text"),
+        summaryContent: byId("summary-content"),
+        summaryTotal: byId("summary-total"),
+        summaryCountLabel: byId("summary-count-label"),
+        summaryBreakdown: byId("summary-breakdown"),
         summaryEmptyBreakdown: byId("summary-empty-breakdown"),
-        chartContainer:        byId("chart-container"),
-        chartEmpty:            byId("chart-empty"),
-        categoryChart:         byId("category-chart"),
+        chartContainer: byId("chart-container"),
+        chartEmpty: byId("chart-empty"),
+        categoryChart: byId("category-chart"),
 
         // Smart Expense Detection
-        smartTextInput:        byId("smart-text-input"),
-        smartTextError:        byId("smart-text-error"),
-        smartExtractBtn:       byId("smart-extract-btn"),
-        smartBtnText:          byId("smart-btn-text"),
-        smartQueueBtn:         byId("smart-queue-btn"),
-        smartQueueBtnText:     byId("smart-queue-btn-text"),
+        smartTextInput: byId("smart-text-input"),
+        smartTextError: byId("smart-text-error"),
+        smartExtractBtn: byId("smart-extract-btn"),
+        smartBtnText: byId("smart-btn-text"),
+        smartQueueBtn: byId("smart-queue-btn"),
+        smartQueueBtnText: byId("smart-queue-btn-text"),
 
         // Smart Transaction Inbox
-        inboxSection:          byId("inbox-section"),
-        inboxBadge:            byId("inbox-badge"),
-        inboxLoading:          byId("inbox-loading"),
-        inboxEmpty:            byId("inbox-empty"),
-        inboxList:             byId("inbox-list"),
-        inboxRefreshBtn:       byId("inbox-refresh-btn"),
+        inboxSection: byId("inbox-section"),
+        inboxBadge: byId("inbox-badge"),
+        inboxLoading: byId("inbox-loading"),
+        inboxEmpty: byId("inbox-empty"),
+        inboxList: byId("inbox-list"),
+        inboxRefreshBtn: byId("inbox-refresh-btn"),
 
         // Demo Transaction Generator
-        demoSection:          byId("demo-section"),
-        simulateDayBtn:       byId("simulate-day-btn"),
+        demoSection: byId("demo-section"),
+        simulateDayBtn: byId("simulate-day-btn"),
     };
 }
 
@@ -197,6 +256,16 @@ async function api(path, options = {}) {
         throw new Error(detail);
     }
 
+    const xCategories = response.headers.get("X-Categories");
+    if (xCategories) {
+        try {
+            const categories = JSON.parse(xCategories);
+            populateCategorySelects(categories);
+        } catch (e) {
+            console.error("Error parsing X-Categories header:", e);
+        }
+    }
+
     return response.json();
 }
 
@@ -214,9 +283,9 @@ async function api(path, options = {}) {
 function showAlert(message, type = "success", ms = 4000) {
     const icons = {
         success: "bi-check-circle-fill",
-        danger:  "bi-exclamation-circle-fill",
+        danger: "bi-exclamation-circle-fill",
         warning: "bi-exclamation-triangle-fill",
-        info:    "bi-info-circle-fill",
+        info: "bi-info-circle-fill",
     };
 
     const wrapper = document.createElement("div");
@@ -483,10 +552,21 @@ function renderExpenses(expenses) {
 
         // Category
         const tdCategory = document.createElement("td");
-        const badge = document.createElement("span");
-        badge.className = `badge badge-category badge-${exp.category}`;
-        badge.textContent = exp.category;
-        tdCategory.appendChild(badge);
+        if (predefinedCategories.includes(exp.category)) {
+            const badge = document.createElement("span");
+            badge.className = `badge badge-category badge-${exp.category}`;
+            badge.textContent = exp.category;
+            tdCategory.appendChild(badge);
+        } else {
+            const badge = document.createElement("span");
+            badge.className = "badge badge-category";
+            badge.textContent = exp.category;
+            const color = getCategoryColor(exp.category);
+            badge.style.backgroundColor = color + "1a"; // 10% opacity background
+            badge.style.color = color;
+            badge.style.border = `1px solid ${color}33`;
+            tdCategory.appendChild(badge);
+        }
 
         // Date
         const tdDate = document.createElement("td");
@@ -573,11 +653,11 @@ async function handleSubmit(e) {
     if (!validateForm()) return;
 
     const data = {
-        title:    $.title.value.trim(),
-        amount:   parseFloat($.amount.value),
+        title: $.title.value.trim(),
+        amount: parseFloat($.amount.value),
         category: $.category.value,
-        date:     $.date.value,
-        note:     $.note.value.trim() || null,
+        date: $.date.value,
+        note: $.note.value.trim() || null,
     };
 
     await saveExpense(data);
@@ -725,7 +805,7 @@ function renderMonthlySummary(data) {
 
         // Clear and populate category list
         $.summaryBreakdown.innerHTML = "";
-        
+
         // Sort categories by amount descending
         const sortedCats = categories.slice().sort((a, b) => breakdown[b] - breakdown[a]);
 
@@ -742,7 +822,7 @@ function renderMonthlySummary(data) {
 
             const dot = document.createElement("span");
             dot.className = "breakdown-dot me-2";
-            dot.style.backgroundColor = categoryColors[cat] || "#64748b";
+            dot.style.backgroundColor = getCategoryColor(cat);
 
             const labelSpan = document.createElement("span");
             labelSpan.className = "fw-medium";
@@ -775,7 +855,7 @@ function renderMonthlySummary(data) {
 
         const labels = sortedCats;
         const values = sortedCats.map(cat => breakdown[cat]);
-        const colors = sortedCats.map(cat => categoryColors[cat] || "#64748b");
+        const colors = sortedCats.map(cat => getCategoryColor(cat));
 
         categoryChartInstance = new Chart($.categoryChart, {
             type: "doughnut",
@@ -797,7 +877,7 @@ function renderMonthlySummary(data) {
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
+                            label: function (context) {
                                 const val = context.raw || 0;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
@@ -909,10 +989,10 @@ function validateDateRange() {
 
 /** Sync current filter UI values into state.filters. */
 function syncFiltersFromUI() {
-    state.filters.title     = $.filterTitle.value.trim();
-    state.filters.category  = $.filterCategory.value;
+    state.filters.title = $.filterTitle.value.trim();
+    state.filters.category = $.filterCategory.value;
     state.filters.from_date = $.filterFromDate.value;
-    state.filters.to_date   = $.filterToDate.value;
+    state.filters.to_date = $.filterToDate.value;
 }
 
 /**
@@ -970,16 +1050,16 @@ async function resetFilters() {
         filterAbortController = null;
     }
 
-    state.filters.title     = "";
-    state.filters.category  = "";
+    state.filters.title = "";
+    state.filters.category = "";
     state.filters.from_date = "";
-    state.filters.to_date   = "";
+    state.filters.to_date = "";
 
     // Reset UI controls
-    $.filterTitle.value    = "";
+    $.filterTitle.value = "";
     $.filterCategory.value = "";
     $.filterFromDate.value = "";
-    $.filterToDate.value   = "";
+    $.filterToDate.value = "";
     $.filterDateWarning.classList.add("d-none");
     $.resetFiltersBtn.classList.add("d-none");
 
@@ -990,11 +1070,11 @@ async function resetFilters() {
 function setupFilterListeners() {
     // R3 fix: title is debounced, category/dates are immediate (delay=0).
     // All go through the same scheduleFilterFetch pipeline.
-    $.filterTitle.addEventListener("input",  () => scheduleFilterFetch(DEBOUNCE_MS));
+    $.filterTitle.addEventListener("input", () => scheduleFilterFetch(DEBOUNCE_MS));
     $.filterCategory.addEventListener("change", () => scheduleFilterFetch(0));
     // R5 fix: use "input" for date fields to catch clears via the X button
     $.filterFromDate.addEventListener("input", () => scheduleFilterFetch(0));
-    $.filterToDate.addEventListener("input",   () => scheduleFilterFetch(0));
+    $.filterToDate.addEventListener("input", () => scheduleFilterFetch(0));
 
     // Reset buttons (header + empty state)
     $.resetFiltersBtn.addEventListener("click", resetFilters);
@@ -1104,7 +1184,7 @@ async function loadInboxTransactions() {
                                     <div class="merchant-title text-truncate" style="max-width: 140px;" title="${escapeAttr(merchant)}">${merchant}</div>
                                     <small class="text-muted">${dateText}</small>
                                 </div>
-                                <span class="badge badge-category badge-${category}">${category}</span>
+                                ${getCategoryBadgeHTML(category)}
                             </div>
                             <div class="amount-value mb-2">${amountText}</div>
                             <div class="raw-message-box p-2 rounded mb-3 border-start border-3 border-secondary">
